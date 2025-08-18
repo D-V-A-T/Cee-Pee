@@ -38,26 +38,15 @@ void maketest()
     for(int i=0;20>i;i++)cout << "1 ";
 }
 
-bool pc(int n){ 
-	for(int i=0;1>i;i++)cout << rand(1, 2e4) << ' ';
-    return 0;
-}
-
-void FUNCTION(){
-	//cout << 1 << el;
-    int n = 1500;
-    while(n--)cout << rand(-5000, 5000) << el;
-}
-
 signed main(){
     // FUNCTION();return 0;
     for(int i=1;i<=T;i++)
    { 
     	cout<<"Test: "<<i<<endl;
     	maketest();
-    	system("working4.exe < inp.txt > outp.txt");
-    	system("test.exe < inp.txt > ans.txt");
-    	if(system("fc outp.txt ans.txt"))
+    	system("./working4 < inp.txt > outp.txt");
+    	system("./test < inp.txt > ans.txt");
+    	if(system("diff outp.txt ans.txt"))
     	{	
     		cout<<"WA"<<endl;
     		return 0;
