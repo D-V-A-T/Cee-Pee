@@ -26,13 +26,12 @@ using namespace std;
  
 const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
  
-void ffopen(){
-    if(fopen(FILE".inp", "r")){
+void IO(){
+    if(fopen("in.txt", "r")){
+        freopen("in.txt", "r", stdin);
+    }else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
 
@@ -45,92 +44,39 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
-int up[N][19], visited[N], D[N], n, sz[N];
-vect<int> G[N];
-
-void DFS(int u, int dep){
-    visited[u] = 1;
-    D[u] = dep;
-
-    for(int v : G[u]) if(!visited[v]){
-        up[v][0] = u;
-        DFS(v, dep+1);
-        sz[u] += sz[v];
-    }
-    sz[u]++;
-}
-
-void prep(){
-    up[1][0] = 1;
-    for(int b=1;19>b;b++){
-        for(int i=1;n>=i;i++){
-            up[i][b] = up[up[i][b-1]][b-1];
-        }
-    }
-}
-
-int lca(int u, int v, bool b = 0){
-    if(D[u] < D[v])swap(u, v);
-
-    int diff= D[u] - D[v], M = -1;
-    for(int b=19;b>=0;b--)if((1<<b) <=diff){
-        u = up[u][b];
-        diff -= (1<<b);
-    }
-
-    if(u==v)return u;
-
-    for(int b=18;b>=0;b--) if(up[u][b] != up[v][b]){
-        u = up[u][b];
-        v = up[v][b];
-    }   
-
-    if(b) return sz[u] + sz[v];
-    else return up[u][0];
-}
-
 void sol(){
-    int q;
-    cin >> n >> q;
-    for(int i=1;n>i;i++){
-        int u, v, w;cin >> u >> v;
-        G[u].eb(v);
-        G[v].eb(u);
-    }
-
-    DFS(1, 0);
-    prep();
-
-    while(q--){
-        int u, v, tmp;
-        cin >> u >> v;
-        if(D[u] < D[v])swap(u, v);
-        int P = lca(u, v);
-        int d = D[u] + D[v] - 2*D[P];
-        if(d&1)cout << "0\n";
-        else{
-            if(D[u] == D[v]){
-                cout << sz[P] - lca(u, v, 1) + n - sz[P]  << el;
-            }else{
-                int tu = u;
-                d/=2;
-                d--;
-                for(int b=19;b>=0;b--) if((1<<b) <= d){
-                    tu = up[tu][b];
-                    d -= 1<<b;
-                }
-                cout << sz[up[tu][0]] - sz[tu] << el;
-            }
+    int n, m;
+    cin >> n >> m;
+    vect<int> cnt(m+5), v[n];
+    for(int i=0;n>i;i++){
+        int l; cin >> l;
+        v[i].rs(l);
+        for(int& j : v[i]){
+            cin >> j;
+            cnt[j]++;
         }
     }
+    
+    for(int i=1;m>=i;i++) if(!cnt[i]) {
+        cout << "NO\n";
+        return;
+    }
+
+    int ellen = 0;
+    for(int i=0;n>i;i++){
+        int fumo = 1;
+        for(int j : v[i]) if(cnt[j] == 1) fumo = 0;
+        ellen += fumo;
+    }
+    cout << (ellen>1 ? "YES\n" : "NO\n");
 }
 
 signed main(){
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
-    ffopen();
+    IO();
     int t=1;
-    //cin >> t;
+    cin >> t;
     while(t--)sol();
 }
 /*

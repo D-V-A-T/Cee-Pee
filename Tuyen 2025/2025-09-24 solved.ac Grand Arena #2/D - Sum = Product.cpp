@@ -45,68 +45,41 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
-int up[N][19], visited[N], D[N], n, mx[N][19];
-vect<pii> G[N];
-
-void DFS(int u, int dep){
-    visited[u] = 1;
-    D[u] = dep;
-
-    for(auto [v, w] : G[u]) if(!visited[v]){
-        mx[v][0] = w;
-        up[v][0] = u;
-        DFS(v, dep+1);
-    }
-}
-
-void prep(){
-    up[1][0] = 1;
-    for(int b=1;19>b;b++){
-        for(int i=1;n>=i;i++){
-            up[i][b] = up[up[i][b-1]][b-1];
-            mx[i][b] = max(mx[i][b-1], mx[up[i][b-1]][b-1]);
-        }
-    }
-}
-
-int lca(int u, int v){
-    if(D[u] < D[v])swap(u, v);
-
-    int diff= D[u] - D[v], M = -1;
-    for(int b=19;b>=0;b--)if((1<<b) <=diff){
-        M = max(M, mx[u][b]);
-        u = up[u][b];
-        diff -= (1<<b);
-    }
-
-    if(u==v)return M;
-
-    for(int b=18;b>=0;b--) if(up[u][b] != up[v][b]){
-        M = max({M, mx[u][b], mx[v][b]});
-        u = up[u][b];
-        v = up[v][b];
-    }   
-    return max({M, mx[u][0], mx[v][0]});
-}
-
 void sol(){
-    int q;
-    cin >> n >> q;
-    for(int i=1;n>i;i++){
-        int u, v, w;cin >> u >> v >> w;
-        G[u].eb(v, w);
-        G[v].eb(u, w);
+    int n;
+    cin >> n;
+    int a[n], no1[n];
+    for(int& i : a) cin >> i;
+    
+    int mx = 9e10, pfs[n];
+
+    partial_sum(a, a+n, pfs);
+
+    auto get = [&](int l, int r){
+        return pfs[r] - (l?pfs[l-1] : 0);
+    };
+
+    for(int i=0;n>i;i++){
+        if(!i || a[i] > 1) no1[i] = i;
+        else no1[i] = no1[i-1];
     }
 
+    set<pii> st;
 
-    DFS(1, 0);
-    prep();
+    for(int i=0;n>i;i++){
+        int P = a[i], j = i-1;
+        while(P <= mx && j>=0){
+            if(a[j] == 1){
+                int pj = j;
+                j = no1[j];
+                if(j+1<i && get(pj, i) <= P && P <= get(j+1, i)) st.insert({j+1, i});
+            }
+            P *= a[j];
+            if(P == get(j, i)) st.insert({j, i});//, cout << j << ' ' << i << el;
+            j--;
+        }
+    }cout << n+st.size() << el;
 
-    while(q--){
-        int u, v;
-        cin >> u >> v;
-        cout << lca(u, v) << el;
-    }
 }
 
 signed main(){

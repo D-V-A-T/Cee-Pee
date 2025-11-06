@@ -24,7 +24,7 @@ using namespace std;
 #define ctz __builtin_ctz
 #define FILE "ellencute"
  
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
+const ll INF=902337203695775807, N=5e6+69, MOD=1e9+7;    
  
 void ffopen(){
     if(fopen(FILE".inp", "r")){
@@ -45,91 +45,57 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
-int up[N][19], visited[N], D[N], n, add[N];
-vect<int> G[N];
-
-void DFS(int u, int dep){
-    visited[u] = 1;
-    D[u] = dep;
-
-    for(int v : G[u]) if(!visited[v]){
-        up[v][0] = u;
-        add[v] += add[u];
-        DFS(v, dep+1);
+int F[N];
+int B(int a, int b=MOD-2){
+    int res = 1;
+    while(b){
+        if(b&1) res = res * a % MOD;
+        a = a * a % MOD;
+        b /= 2;
     }
+    return res;
 }
 
-void prep(){
-    up[1][0] = 1;
-    for(int b=1;19>b;b++){
-        for(int i=1;n>=i;i++){
-            up[i][b] = up[up[i][b-1]][b-1];
-        }
-    }
+int C(int n, int k){
+    if(n < k) return 0;
+    return F[n] * B(F[k] * F[n-k] % MOD) % MOD;
 }
 
-int lca(int u, int v){
-    if(D[u] < D[v])swap(u, v);
-
-    int diff= D[u] - D[v], M = -1, tu = u;
-    for(int b=19;b>=0;b--)if((1<<b) <=diff){
-        u = up[u][b];
-        diff -= (1<<b);
-    }
-
-    if(u==v)return u;
-
-    for(int b=18;b>=0;b--) if(up[u][b] != up[v][b]){
-        u = up[u][b];
-        v = up[v][b];
-    }   
-
-    return up[u][0];
-}
-
-void dfs(int u){
-    visited[u] = 1;
-    for(int v : G[u])if(!visited[v]){
-        dfs(v);
-        add[u] += add[v];
-    }
+int W(int x1, int y1, int x2, int y2){
+    int moves = y2 - y1 + x2 - x1;
+    return C(moves, x2 - x1);
 }
 
 void sol(){
-    int q;
-    cin >> n >> q;
-    for(int i=1;n>i;i++){
-        int u, v, w;cin >> u >> v;
-        G[u].eb(v);
-        G[v].eb(u);
+    int n;
+    cin >> n;
+    if(n&1){
+        cout << 0;
+        return;
+    }
+    string s;cin >> s;
+
+    int open = 0, x=0, y=0;
+    for(char c : s){
+        if(c == ')'){
+            if(!open){
+                cout << 0;
+                return;
+            }
+            open--;
+            x++;
+        }else y++, open++;
     }
 
-    DFS(1, 0);
-    prep();
-
-    while(q--){
-        int u, v, w;
-        cin >> u >> v >> w;
-        if(D[u] < D[v]) swap(u, v);
-        int P = lca(u, v);
-        if(P>1) add[up[P][0]] -= w;
-        add[P] -= w;
-        add[u] += w;
-        add[v] += w;
-    }    
-
-
-    memset(visited, 0, sizeof visited);
-    dfs(1);
-
-    for(int i=1;n>=i;i++)cout << add[i] << ' ';
-    
+    cout << pm(W(x, y, n/2, n/2) - W(x, y, n/2+1, n/2-1));
 }
 
 signed main(){
     ios_base::sync_with_stdio(false);
     cin.tie(NULL);
     ffopen();
+    F[0] = 1;
+    for(int i=1;N>i;i++) F[i] = F[i-1] * i % MOD;
     int t=1;
     //cin >> t;
     while(t--)sol();

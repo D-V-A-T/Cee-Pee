@@ -45,83 +45,47 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
-int up[N][19], visited[N], D[N], n;
-vect<int> G[N];
-
-void DFS(int u, int dep){
-    visited[u] = 1;
-    D[u] = dep;
-
-    for(int v : G[u]) if(!visited[v]){
-        up[v][0] = u;
-        DFS(v, dep+1);
-    }
-}
-
-void prep(){
-    up[1][0] = 1;
-    for(int b=1;19>b;b++){
-        for(int i=1;n>=i;i++){
-            up[i][b] = up[up[i][b-1]][b-1];
-        }
-    }
-}
-
-int lca(int u, int v){
-    if(D[u] < D[v])swap(u, v);
-
-    int diff= D[u] - D[v];
-    for(int b=19;b>=0;b--)if((1<<b) <=diff){
-        u = up[u][b];
-        diff -= (1<<b);
-    }
-
-    if(u==v)return u;
-
-    for(int b=18;b>=0;b--) if(up[u][b] != up[v][b]){
-        u = up[u][b];
-        v = up[v][b];
-    }
-    return up[u][0];
-}
-
 void sol(){
-    int q;
-    cin >> n >> q;
-    for(int i=1;n>i;i++){
-        int u, v, w;cin >> u >> v;
-        G[u].eb(v);
-        G[v].eb(u);
-    }
+    int n, m, x, y;
+    cin >> n >> m >> x >> y;
+    vect<int> a(n), b(m), cap(n);
+    for(int& i : a) cin >> i;
+    for(int& i : b) cin >> i;
 
-    DFS(1, 0);
-    prep();
+    sort(bend(a));
+    sort(bend(b));
 
-    while(q--){
-        int u, v, w;
-        cin >> u >> v >> w;
-
-        int ca = lca(u, v);
-        if(D[u] + D[v] - 2*D[ca] <= w){
-            cout << v << el;
-            continue;
-        }
-
-        int x = D[u] - D[ca];
-        if(w > x){
-            x = D[v] - (D[ca] + w - x);
-            swap(u, v);
-        }else x = w;
-
-        for(int b=18;b>=0;b--){
-            if(x >= (1<<b)){
-                u = up[u][b];
-                x -= 1<<b;
+    int p = n-1, q = n-1;
+    for(int i=m-1;i>=0;i--){
+        if(p>=0 && a[p]>=b[i]){
+            if(cap[p] < y){
+                cap[p]++;
             }
         }
+        else{            
+            if(cap[q] >= x) q--;
+            if(q>=0 && a[q] < b[i]){
+                cout << "impossible";
+                return;
 
-        cout << u << el;
+            }
+            if(q<0){
+                cout << "impossible";
+                return;
+            }
+            cap[q]++;
+        }
+
+        if(p>=0 && cap[p] >= y) p--;
+
+        if(p<0 && q<0){
+            cout << "impossible";
+            return;
+        }
     }
+    int ans = 0;
+    for(int i : cap) if(i <= y) ans++;
+    cout << ans << el;
 }
 
 signed main(){
