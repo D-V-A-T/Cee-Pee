@@ -18,7 +18,6 @@ using namespace std;
 #define el '\n'
 #define deb cout<<"\nok\n";return 
 #define ll long long
-#define int long long
 #define dbl long double
 #define popcnt __builtin_popcount
 #define ctz __builtin_ctz
@@ -111,7 +110,7 @@ void sol(){
             l++;
             continue;
         }
-        if(l > r) r = l, cbd = 0;
+        if(l > r) r = l, cbd = 0;    
 
 
         while(n > r+1 && cbd+dd[r] <= k){
