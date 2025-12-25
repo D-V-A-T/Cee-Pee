@@ -39,12 +39,12 @@ void IO(){
     }
 }
 
-const ll N = 3e5 + 69, MOD = 1e9+7, INF = 1000000000000000069;
+const ll N = 3e5 + 69, MOD = 111539786, INF = 1000000000000000069;
 
 mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
 
 ll rand(ll l, ll r){
-    return uniform_int_distribution<ll>(l, r)(rng);
+	return uniform_int_distribution<ll>(l, r)(rng);
 }
 ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
 ll sq(ll x){return x*x;}
@@ -55,72 +55,46 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
+typedef vect<vect<int>> matrix;
 
-pair<dbl, dbl> a[8];
-vect<int> p(8);
+matrix mul(const matrix& a, const matrix& b){
+	long n = a.size(), m = b[0].size();
+	matrix res(n, vect<int>(m));
+	for(long i=0;n>i;i++){
+		for(long j=0;m>j;j++){
+			for(long k=0;a[0].size()>k;k++){
+				res[i][j] = (res[i][j] + a[i][k] * b[k][j]) % MOD;
+			}
+		}
+	}
 
-dbl calc(int seed1, int seed2){
-    dbl x, y;
-    if(seed1 < seed2) x = a[p[seed1]].fi, y = a[p[seed2]].se;
-    else x = a[p[seed1]].se, y = a[p[seed2]].fi;
-    
-    return x / (x+y);
+	return res;
 }
 
-vect<dbl> gacha(int l, int r){
-    vect<dbl> prob(8);
+matrix identity(int n){
+	matrix res(n, vect<int>(n));
+	for(long i=0;n>i;i++) res[i][i] = 1;
+	return res;
+}
 
-    if(l == r){
-        for(int i=0;8>i;i++){
-            if(i == l) prob[i] = 1;
-            else prob[i] = 0;
-        } 
-        return prob;
-    }
+matrix Mp(matrix a, int b){
+	matrix res = identity(a.size());
 
-    int mid = (l+r)/2;
+	while(b){
+		if(b&1) res = mul(res, a);
+		a = mul(a, a);
+		b >>= 1;
+	}
 
-    vect<dbl> left, right, res(8);
-
-    left = gacha(l, mid);
-    right = gacha(mid+1, r);
-
-    for(int seed1=l;mid>=seed1;seed1++){
-        for(int seed2=mid+1;r>=seed2;seed2++){
-
-            int win = p[seed1], op = p[seed2];
-
-            res[seed1] += calc(seed1, seed2) * left[seed1] * right[seed2];
-        }
-    }
-
-    for(int seed1=mid+1;r>=seed1;seed1++){
-        for(int seed2=l;mid>=seed2;seed2++){
-
-            int win = p[seed1], op = p[seed2];
-
-            res[seed1] +=  calc(seed1, seed2) * right[seed1] * left[seed2];
-        }
-    }
-
-    dbl total = 0;
-
-    return res;
-
+	return res;
 }
 
 void sol(){
-    for(auto& i : a) cin >> i.fi >> i.se;
-    iota(bend(p), 0);
-    dbl ans = 0;
-
-    do{
-        vect<dbl> res = gacha(0, 7);
-        for(int i=0;8>i;i++) if(p[i] == 0)  ans = max(ans, res[i]);
-
-    }while(next_permutation(bend(p)));
-
-    cout << fixed << setprecision(15) << ans;
+	int n;
+	cin >> n;
+	matrix base = {{1, 1}, {1, 0}};
+	matrix final = mul(Mp(base, n-1), {{1}, {1}});
+	cout << final[0][0] << el;
 }
 
 signed main(){
@@ -128,7 +102,7 @@ signed main(){
     cin.tie(NULL);cout.tie(NULL);
     IO();
     int t = 1;
-    // cin >> t;
+    cin >> t;
     while(t--) sol();
 }
 /*
