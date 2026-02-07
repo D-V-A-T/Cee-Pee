@@ -1,0 +1,259 @@
+#ifdef ONLINE_JUDGE
+
+#include<bits/allocator.h>
+#pragma GCC optimize("Ofast,unroll-loops")
+#pragma GCC target("avx2,fma,bmi,bmi2,popcnt,lzcnt,tune=native")
+
+#endif 
+
+#include<bits/stdc++.h>
+using namespace std;
+#define fi first
+#define se second
+#define pii pair<int, int>
+#define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
+#define pob pop_back
+#define ef emplace_front
+#define pf push_front
+#define pof pop_front
+#define el "\n"
+#define deb cout<<"\nok\n";return 
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
+#define popcnt __builtin_popcount
+#define clz __builtin_clz
+#define ctz __builtin_ctz
+#define ll long long 
+#define dbl long double
+#define int long long
+
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
+    if(fopen(FILE".in", "r")){
+        freopen(FILE".in", "r", stdin);
+        freopen(FILE".out", "w", stdout);
+    }
+    else if(fopen(FILE".inp", "r")){
+        freopen(FILE".inp", "r", stdin);
+        freopen(FILE".out", "w", stdout);
+    }
+}
+
+const ll N = 3e5 + 1, MOD = 1e9 + 7, INF = 1000000000000000069;
+
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll sq(ll x){return x*x;}
+ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
+    if(a == -1 || b == -1)return -1;
+    ll g = __gcd(a,b);
+    if(b/g > lim/a)return -1;
+    return (a/g)*b;
+}
+
+struct Matrix{
+    vect<vect<ll>> mat;
+
+    int n, m;
+
+    Matrix(int n, int m){
+        this->n = n;
+        this->m = m;
+
+        mat.rs(n, vect<ll>(m));
+
+    }
+
+    void make_identity(){
+        assert(n == m);
+        for(int i=0; n>i; i++) mat[i][i] = 1;
+    }
+
+    auto & operator [] (int id){
+        return mat[id];
+    }
+
+    const auto & operator [] (int id) const{
+        return mat[id];
+    }
+
+    Matrix operator * (const Matrix& o) const{
+        auto &a = mat;
+        auto &b = o.mat;
+        assert(a[0].size() == b.size());
+        int x = a.size(), y = b.size(), z = b[0].size();
+
+        Matrix res(x, z);
+        auto &c = res.mat;
+        res.fill(INF);
+
+        for(size_t i=0; x>i; i++){
+            for(size_t j=0; y>j; j++){
+                for(size_t k=0; z>k; k++){
+                    c[i][k] = min(c[i][k], (a[i][j] + b[j][k]));
+                }
+            }
+        }
+
+        return res;
+    }
+
+    Matrix operator ^ (int P) const{
+        Matrix res(n, m), base(n, m);
+
+        base.mat = mat;
+        res.make_identity();
+
+        while(P){
+            if(P&1) res = res * base;
+
+            base = base * base;
+
+            P >>= 1;
+        }
+
+        return res;
+    }
+
+    void fill(int val){
+        for(auto& i : mat) for(auto& j : i) j = val;
+    }
+
+    void print(){
+        for(int i=0; n>i; i++){
+            for(int j=0; m>j; j++){
+                cout << mat[i][j] << " \n"[j ==m-1];
+            }
+        }
+    }
+};
+
+int n, m, k;
+vect<int> G[N], in(N), dp(N);
+
+bool check_length_k(){
+    queue<int> que;
+    for(int i=0; n>i; i++) if(in[i] == 0) que.push(i);
+    vect<int> topo;
+
+    while(que.size()){
+        int u = que.front();
+        topo.eb(u);
+        que.pop();
+
+        for(int v : G[u]) if(--in[v] == 0) que.push(v);
+    }
+    
+    if(topo.size() != n) return 1;
+
+    for(int i=topo.size()-1; i>=0; i--){
+        int u = topo[i];
+
+        for(int v : G[u]) dp[u] = max(dp[u], dp[v] + 1); 
+    }
+
+    return *max_element(bend(dp)) >= k;
+}
+
+void sol(){
+    cin >> n >> m >> k;
+    Matrix sus(1, n);
+    for(int i=0; n>i; i++) sus[0][i] = 0;
+
+    Matrix base(n, n);
+    base.fill(INF);
+    
+    for(int i=0; m>i; i++){
+        int u, v, w;
+        cin >> u >> v >> w;
+        u--;v--;
+        G[u].eb(v);
+        in[v]++;
+
+        base[u][v] = w;
+    }    
+
+    if(!check_length_k()) {
+        cout << "IMPOSSIBLE";
+        return;
+    }
+
+    Matrix res = sus * (base ^ k);
+
+    int ans = INF;
+    for(int i=0; n>i; i++) ans = min(ans, res[0][i]);
+    cout << ans;
+}
+
+signed main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);cout.tie(NULL);
+    IO();
+    int t = 1;
+    // cin >> t;
+    while(t--) sol();
+}
+/*
+                                                     ...-%%%%%%%%%%%...                               
+                                             .:**#%=%%%%%+........-%%%%. .                            
+                                        .%%%%%%=-..%#.               .#%%.                            
+                                      %%%+..      .:                    *%%.                          
+                                    .%%.          :.                     :%%%%%:.                     
+                                   .%%.     ...  .:                    ::     .=%%%.                  
+                                 ..%%.    #%#:%. :                   :..          =%%.                
+                                %%+..:  .%*::::%-::::::-::::::..   .:-%%%%.        .*%%..             
+                              .%#     :.%:::::::%%%%%%%%%%%%%+...%%%+::::%#.         .%%.             
+                             .%%.  ..:.%=::::*%#***#%::::::::%%%%=:::::::%%.          .%%.            
+                             =%%%...-%%%:::*%********%:::%%%****%::::::::%%            .%-            
+                            .%::::%%***%=:%%**********%%********%:::::::=%-:.          .%..           
+                            #%:::%#*****%%**********************%:::+%%%*%%-.:      .::..%%.          
+                           .%%::%%*****==**==*****#************#%%%%#******%%..::::..     .%%.        
+                         .%%#%+%%***************##*+=+*==********************%%.:.         .%%        
+                        .%%***%%****************#**==**==******==**+=+********%%%%%%%%%     %%.       
+                      .#%#*********************%%**************++************%%::::::%*   .%%%.       
+                     .%%***************#*****%%%****************************%%::::::%% .-%%%.         
+                    .#%***************#****%%--%*********%*****************%#::::-%%%%%%%%%%.         
+                    .%%**************#**%%%----%********%%**************#***#%%%#**%#******%*         
+                   .%%**************#%%%--.....%%*******%%**************#**********#%******%%.        
+                   .%%*************%%...........%%******%-%*************#***********%%*****%%.        
+                   .%%*************%%...%%%%%.....%%%%%%%.=%%%%%%%%##****#****##::::+%%*****%#        
+                   .%%************%%...%.   %%.................%%%%-.....%*****#*****%%*****%%        
+                   .#%#*#****#****%%:::%-  %%.................%.   #-....%*****#*#####%#****%%.       
+                    .%%##****%%%**%%:::::##...................%=  .%+:::%#*****#:####*%%****%%.       
+                     .+%%#**%%.#%%%%::::::........###+.:*##-....%%%:::::%*****##******%%****%%-       
+                       ..%%*%%.......:::.......##..#*...#+..#*....:::::%******#*****##%%*****%%.      
+                        .%%%%%................#-##=--##+-+###-#....:::%******#:###*::%%#*****%%.      
+                      .%%****%%..............#----------------=*...#%#****##**##::#**%%*******%%.     
+                      .%%%%%*=+%%*...........#-----------------#.....#%%%%%%+:##*##:*%%*******%%%.    
+                        ..:*%====%%%%........#-----------------#:.........%#********%%*****%%%%%%.    
+                          .%%=======*%%%%%%%.%%+----#-%------%%#.......%%%%::::::::%%==***#%###%%.    
+                         ..%%=============+%%-:#%%%%-::%%%%%%::%%%%%%%%%=%%*******%%=====**%%###%%..  
+                        -%%%%%%%%%%%%%%%%+%.%+:+%::%::::%::%:::%%#%... .%%******%%%========#%####%%.  
+                      .%%++#############%%# ..%%.**%%#%%%%%%%#%***%.  :%%*****%%%=+%%%%%%%%%%#####%%. 
+                    .%%++++*############*++%   .%************#****%.  #%*%%%%+++%%%%###############%%.
+         .+%%%%%%%%%%####+##########*+++++%%. .%**#**********#****%   %%**%%%++++###################%:
+      =%%%%######################++++++++%%*%.-%%#***********#****% .%****%%+++++###################%%
+   .%%%#######################*%%%%%%%%.%%*#%+%###################%.%%***%%%+++++###################%%
+  *%%######################+#%%++++++%*. =%*%. .:%%%%########%%%%%%%%%#*#%.%%++#####################%%
+.%%%#####################%%%%%+++++++%-  %*#%%.          .%%%*++++++*%%%....%%#####################%%*
+%%######%%%%%#%%%%%######%%.%*+++++++%.  %****#.        .%%+++*+++++*++%%...=%%###################%%%.
+%%%%%%%%#-=##%...%%######%%.%%+++++++%%..*%***#%%%%%. ..%+++++++++++++++%%...%%##################%%%. 
+.%:.             .#%#####%%.%%+++++++++%. %*********%%%%%++++++++++++++++%%...%%##############%%%%..  
+                  :%#####%% .%%+++++++%%  .%%**********%%++++++++++++++++%%.....%#########%%%%%% .    
+                 *%#####%%.  .%%+++++++%%:. .%%********%%++++++++++++++++%%....%%%%%%%%%%%%*..        
+                 .%%##%%%     .%%*+++++++%%. ..#%%%#****%%+++++++++++++++%%%%%% . .....               
+                 %%#%%%.       .:%%%%%%%%%%%...-%. ......%%+++++++++++++%%.                           
+               ..%%%.              ...     .%%%#%%%=:#%%%%%%%%*++++++%%%#                             
+                                                 .-%%+.  ... .%%%%%%%:.  
+*/
