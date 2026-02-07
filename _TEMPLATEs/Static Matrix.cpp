@@ -3,10 +3,11 @@
 #define vect vector 
 using namespace std;
 
-const int MOD = 1e9+7, mat_sz = 2;
+const int MOD = 1e9+7, max_mat_sz = 4;
+int mat_sz = 2;
 
 struct StaticMatrix{
-	ll mat[mat_sz][mat_sz];
+	ll mat[max_mat_sz][max_mat_sz];
 	size_t n = mat_sz;
 
 	StaticMatrix(){
@@ -67,7 +68,7 @@ struct StaticMatrix{
 };
 
 struct Vector{
-	ll vec[mat_sz];
+	ll vec[max_mat_sz];
 	size_t n = mat_sz;
 
 	Vector(){
