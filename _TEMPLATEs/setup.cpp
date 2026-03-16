@@ -46,7 +46,7 @@ mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
 ll rand(ll l, ll r){
     return uniform_int_distribution<ll>(l, r)(rng);
 }
-ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll pm(ll a,const int b=MOD){return (a%=b) < 0 ? a + b : a;}
 ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;

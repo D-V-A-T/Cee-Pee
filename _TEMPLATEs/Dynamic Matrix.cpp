@@ -1,18 +1,17 @@
 #include<bits/stdc++.h>
 #define ll long long
-#define vect vector 
 using namespace std;
 
 const int MOD = 1e9+7;
 
 struct DynamicMatrix{
-	vect<vect<ll>> mat;
+	vector<vector<ll>> mat;
 	size_t n, m;
 
 	DynamicMatrix(int n, int m){
 		this -> n = n;
 		this -> m = m;
-		mat.resize(n, vect<ll>(m));
+		mat.resize(n, vector<ll>(m));
 	}
 
 	auto & operator [](int id){
@@ -62,12 +61,12 @@ struct DynamicMatrix{
 	}
 
 	void Fill(ll val){
-		mat.assign(n, vect<ll>(m, val));
+		mat.assign(n, vector<ll>(m, val));
 	}
 
 	void make_identity(){
 		assert(n == m);
-		mat.assign(n, vect<ll>(m, 0));
+		mat.assign(n, vector<ll>(m, 0));
 		for(size_t i=0; n>i; i++) mat[i][i] = 1;
 	}
 
