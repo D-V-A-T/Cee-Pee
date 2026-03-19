@@ -1,32 +1,40 @@
+#ifdef ONLINE_JUDGE
+
+#include<bits/allocator.h>
+#pragma GCC optimize("Ofast,unroll-loops")
+#pragma GCC target("avx2,fma,bmi,bmi2,popcnt,lzcnt,tune=native")
+
+#endif 
+
 #include<bits/stdc++.h>
-using namespace std; 
+using namespace std;
 #define fi first
 #define se second
-#define pb push_back
-#define eb emplace_back
-#define umap unordered_map
-#define prq priority_queue
-#define vect vector
-#define rs resize
+#define pii pair<int, int>
 #define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
 #define pob pop_back
+#define ef emplace_front
+#define pf push_front
 #define pof pop_front
-#define lwb lower_bound
-#define upb upper_bound
-#define pii pair<int,int>
-#define nextl cout << '\n'
-#define el '\n'
+#define el "\n"
 #define deb cout<<"\nok\n";return 
-#define ll long long
-#define int unsigned long long
-#define dbl long double
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
 #define popcnt __builtin_popcount
+#define clz __builtin_clz
 #define ctz __builtin_ctz
-#define FILE "ellencute"
- 
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
- 
-void ffopen(){
+#define ll long long 
+#define dbl long double
+
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
     if(fopen(FILE".in", "r")){
         freopen(FILE".in", "r", stdin);
         freopen(FILE".out", "w", stdout);
@@ -34,14 +42,18 @@ void ffopen(){
     else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
 
-int pm(int a,const int b=MOD){return ((a%b)+b)%b;}
-int sq(int x){return x*x;}
+const ll N = 3e5 + 1, MOD = 1e9+7, INF = 1000000000000000069;
+
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;
     ll g = __gcd(a,b);
@@ -49,42 +61,77 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
-void sol(){
-    int n, m;
-    cin >> n >> m;
-    int a[n+1], spt[n+5][62];
-    for(int i=1;n>=i;i++){
-        cin >> a[i];
-        spt[i][0] = a[i];
-    }
-
-
-
-    for(int b=1;62>b;b++){
-        for(int i=1;n>=i;i++){
-            spt[i][b] = spt[spt[i][b-1]][b-1];
-        }
-    }
-
-
-    int ans[n+1];
-    for(int i=1;n>=i;i++){
-        int x = i;
-        for(int b=0;62>b;b++) if(m & (1ll<<b)) x = spt[x][b];
-        ans[x] = i;
-    }
-
-    for(int i=1;n>=i;i++) cout << ans[i] << ' ';
+bool get_bit(int mask, int x){
+    return mask & (1ll<<x);
 }
 
-signed main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    ffopen();
-    int t=1;
-    //cin >> t;
-    while(t--)sol();
+vect<int> get_attachment(vect<int> source){
+    int n = source.size();
+    vect<int> add;
+    int bity = 0, a_y = 0;
+    for(int i=0; n>i; i++){
+        int b = source[i];
+        if(b) bity ^= 1, a_y ^= (i+1);
+    }
+
+    add.eb(bity);
+
+    for(int i=0; log2(n + 1) > i; i++){
+        // cout << get_bit(a_y, i) << ' ' << a_y << el;
+        add.eb(get_bit(a_y, i));
+    }
+    for(int i : add) source.eb(i);
+    // for(int i=0; n>i; i++) cout << source[i] << ' ';
+    //     nextl;
+    return add;
 }
+
+vect<int> retrieve(vect<int> data){
+    int n = data.size() > 200 ? 255 : 63;
+    // cerr << data.size() << el;
+    int bity = 0, b_y = 0;
+    for(int i=0; n>i; i++){
+        bity ^= data[i];
+        if(data[i]) b_y ^= i+1;//, cout << "! " << b_y << el;
+    }
+    vect<int> ans;
+
+    if(bity == data[n]){
+        for(int i=0; n>i; i++) ans.eb(data[i]);
+        return ans;
+    }else{
+        int a_y = 0;
+        for(int i=n+1; data.size() > i; i++) a_y ^= data[i] * (1ll << (i - n - 1));
+        int wrong = (a_y ^ b_y) - 1;
+
+        if(wrong >= 0 && wrong < n) data[wrong] ^= 1;
+
+        for(int i=0; n>i; i++) ans.eb(data[i]);
+        return ans;
+    }
+}
+
+// void sol(){
+//     vect<int> att ={1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 1, 1, 1, 1, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 1, 1, 0, 1, 0, 0, 0, 0, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 0, 1, 1, 1, 0, };
+//     att.assign(63, 0);
+//     for(int &i : att) cin >> i;
+//         // for(int i : att) cout << i << ' ';
+//     vect<int> imp = get_attachment(att);
+
+//     imp[rand(0, imp.size() - 1)] ^= 1;
+
+//     vect<int> sus = retrieve(imp);
+//     cout << (sus == att) << el;
+// }
+
+// signed main(){
+//     ios_base::sync_with_stdio(0);
+//     cin.tie(NULL);cout.tie(NULL);
+//     IO();
+//     int t = 1;
+//     // cin >> t;
+//     while(t--) sol();
+// }
 /*
                                                      ...-%%%%%%%%%%%...                               
                                              .:**#%=%%%%%+........-%%%%. .                            

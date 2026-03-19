@@ -1,32 +1,32 @@
 #include<bits/stdc++.h>
-using namespace std; 
+using namespace std;
 #define fi first
 #define se second
-#define pb push_back
-#define eb emplace_back
-#define umap unordered_map
-#define prq priority_queue
-#define vect vector
-#define rs resize
+#define pii pair<int, int>
 #define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
 #define pob pop_back
+#define ef emplace_front
+#define pf push_front
 #define pof pop_front
-#define lwb lower_bound
-#define upb upper_bound
-#define pii pair<int,int>
-#define nextl cout << '\n'
-#define el '\n'
+#define el "\n"
 #define deb cout<<"\nok\n";return 
-#define ll long long
-#define int unsigned long long
-#define dbl long double
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
 #define popcnt __builtin_popcount
+#define clz __builtin_clz
 #define ctz __builtin_ctz
-#define FILE "ellencute"
- 
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
- 
-void ffopen(){
+#define ll long long 
+#define dbl long double
+
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
     if(fopen(FILE".in", "r")){
         freopen(FILE".in", "r", stdin);
         freopen(FILE".out", "w", stdout);
@@ -34,14 +34,18 @@ void ffopen(){
     else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
 
-int pm(int a,const int b=MOD){return ((a%b)+b)%b;}
-int sq(int x){return x*x;}
+const ll N = 1e6 + 10, MOD = 1e9+7, INF = 1000000000000000069;
+
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;
     ll g = __gcd(a,b);
@@ -49,41 +53,100 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
+int n;
+
+struct DSU{
+	int par[N], len[N], mn[N];
+	
+	DSU(){
+		fill(len, len + N, 1);
+		iota(par, par + N, 0);
+		iota(mn, mn + N, 0);
+	}
+	
+	int findpar(int u){
+		return u == par[u] ? u : (par[u] = findpar(par[u]));
+	}
+	
+	void join(int u, int v){
+		u = findpar(u), v = findpar(v);
+		if(u != v){
+			if(len[u] < len[v]) swap(u, v);
+			len[u] += len[v];
+			par[v] = u;
+			mn[u] = min(mn[u], mn[v]);
+		}
+	}
+	
+	int getmin(int u){
+		return mn[findpar(u)];
+	}
+} ds;
+
+vect<int> bit[N];
+int test[N];
+
+void upd(int x, int val){
+	for(;x > 0; x -= x & -x) bit[x].eb(val);
+}
+
+void get(int x, int val){
+	int res = 0;
+	for(;x < N; x += x & -x){
+		res += test[x];
+		if(bit[x].size()){
+			while(bit[x].size() > 1){
+				ds.join(val, bit[x].back());
+				bit[x].pob();
+			}
+			ds.join(val, bit[x].back());
+		}
+	}
+}
+
 void sol(){
-    int n, m;
-    cin >> n >> m;
-    int a[n+1], spt[n+5][62];
-    for(int i=1;n>=i;i++){
-        cin >> a[i];
-        spt[i][0] = a[i];
-    }
-
-
-
-    for(int b=1;62>b;b++){
-        for(int i=1;n>=i;i++){
-            spt[i][b] = spt[spt[i][b-1]][b-1];
-        }
-    }
-
-
-    int ans[n+1];
-    for(int i=1;n>=i;i++){
-        int x = i;
-        for(int b=0;62>b;b++) if(m & (1ll<<b)) x = spt[x][b];
-        ans[x] = i;
-    }
-
-    for(int i=1;n>=i;i++) cout << ans[i] << ' ';
+	cin >> n;
+	
+	int a[n];
+	vect<int> pos(n+5);
+	set<int> s;
+	for(int i=0; n>i; i++){
+		cin >> a[i];
+		pos[a[i]] = i;
+	}
+	
+	vect<vect<int>> ans(n+1);
+	
+	for(int i=0; n>i; i++){
+		get(a[i], a[i]);
+		upd(a[i], a[i]);
+	}
+	
+	// deb;
+	
+	unordered_set<int> us;
+	
+	for(int i=1; n>=i; i++){
+		ans[ds.getmin(i)].eb(i);
+		us.insert(ds.getmin(i));
+	}
+	
+	cout << us.size() << el;
+	for(int i=1; n>=i; i++){
+		if(ans[i].empty()) continue;
+		cout << ans[i].size() << ' ';
+		for(int j : ans[i]) cout << j << ' ';
+		nextl;	
+	}
 }
 
 signed main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    ffopen();
-    int t=1;
-    //cin >> t;
-    while(t--)sol();
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);cout.tie(NULL);
+    IO();
+    int t = 1;
+    // cin >> t;
+    while(t--) sol();
 }
 /*
                                                      ...-%%%%%%%%%%%...                               

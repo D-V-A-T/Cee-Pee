@@ -1,32 +1,33 @@
 #include<bits/stdc++.h>
-using namespace std; 
+using namespace std;
 #define fi first
 #define se second
-#define pb push_back
-#define eb emplace_back
-#define umap unordered_map
-#define prq priority_queue
-#define vect vector
-#define rs resize
+#define pii pair<int, int>
 #define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
 #define pob pop_back
+#define ef emplace_front
+#define pf push_front
 #define pof pop_front
-#define lwb lower_bound
-#define upb upper_bound
-#define pii pair<int,int>
-#define nextl cout << '\n'
-#define el '\n'
+#define el "\n"
 #define deb cout<<"\nok\n";return 
-#define ll long long
-#define int unsigned long long
-#define dbl long double
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
 #define popcnt __builtin_popcount
+#define clz __builtin_clz
 #define ctz __builtin_ctz
-#define FILE "ellencute"
- 
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
- 
-void ffopen(){
+#define ll long long 
+#define dbl long double
+#define int long long
+
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
     if(fopen(FILE".in", "r")){
         freopen(FILE".in", "r", stdin);
         freopen(FILE".out", "w", stdout);
@@ -34,14 +35,18 @@ void ffopen(){
     else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
 
-int pm(int a,const int b=MOD){return ((a%b)+b)%b;}
-int sq(int x){return x*x;}
+const ll N = 3e5 + 1, MOD = 1e9+7, INF = 1000000000000000069;
+
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;
     ll g = __gcd(a,b);
@@ -49,41 +54,98 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
+int E(vect<int> v){
+	int n = v.size(), res = 0;
+	vect<int> left(n), right(n), stk;
+	
+	for(int i=0; n>i; i++){
+		while(stk.size() && v[stk.back()] >= v[i]) stk.pob();
+		
+		if(stk.size()) left[i] = stk.back() + 1;
+		else left[i] = 0;
+		
+		stk.eb(i);
+	}	
+	
+	stk.clear();
+	
+	for(int i=n-1; i>=0; i--){
+		while(stk.size() && v[stk.back()] >= v[i]) stk.pob();
+		
+		if(stk.size()) right[i] = stk.back() - 1;
+		else right[i] = n-1;
+		
+		res = max(res, v[i] * (right[i] - left[i] + 1));
+		
+		stk.eb(i);
+	}
+	
+	return res;
+}
+
 void sol(){
-    int n, m;
-    cin >> n >> m;
-    int a[n+1], spt[n+5][62];
-    for(int i=1;n>=i;i++){
-        cin >> a[i];
-        spt[i][0] = a[i];
-    }
-
-
-
-    for(int b=1;62>b;b++){
-        for(int i=1;n>=i;i++){
-            spt[i][b] = spt[spt[i][b-1]][b-1];
-        }
-    }
-
-
-    int ans[n+1];
-    for(int i=1;n>=i;i++){
-        int x = i;
-        for(int b=0;62>b;b++) if(m & (1ll<<b)) x = spt[x][b];
-        ans[x] = i;
-    }
-
-    for(int i=1;n>=i;i++) cout << ans[i] << ' ';
+	int n, m;
+	cin >> n >> m;
+	int a[n+2][m+2];
+	memset(a, 0, sizeof a);
+	
+	for(int i=1; n>=i; i++){
+		for(int j=1; m>=j; j++){
+			cin >> a[i][j];
+		}
+	}
+	
+	int sz = max(n, m) + 5;
+	int max_right[sz], ans = 0;
+	vect<vect<int>> max_down(2, vect<int>(sz));
+	
+	for(int j=m; j>0; j--){
+		
+		swap(max_down[0], max_down[1]);
+		
+		for(int i=n; i>0; i--){
+			if(i == n) max_down[0][i] = i;
+			else if(i == n-1) max_down[0][i] = i+1;
+			else{
+				if(a[i][j] - a[i+1][j] == a[i+1][j] - a[i+2][j]) 
+					max_down[0][i] = max_down[0][i+1];
+				else max_down[0][i] = i+1;
+			}
+			
+			if(j == m) max_right[i] = 1;
+			else if(j == m-1) max_right[i] = 2;
+			else{
+				if(a[i][j] - a[i][j+1] == a[i][j+1] - a[i][j+2]) max_right[i]++;
+				else max_right[i] = 2;
+			}
+			
+			ans = max(ans, max_down[0][i] - i + 1);
+			ans = max(ans, max_right[i]);
+		}
+		
+		if(j < m){
+			for(int i=1; n>i;){
+				int next_row = min(max_down[0][i], max_down[1][i]);
+				vect<int> sus;
+				for(int f=i; next_row >= f; f++) sus.eb(max_right[f]);
+				ans = max(ans, E(sus));
+				i = next_row;
+			}
+		}
+		
+	}
+	
+	
+	cout << ans << el;
 }
 
 signed main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    ffopen();
-    int t=1;
-    //cin >> t;
-    while(t--)sol();
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);cout.tie(NULL);
+    IO();
+    int t = 1;
+    cin >> t;
+    while(t--) sol();
 }
 /*
                                                      ...-%%%%%%%%%%%...                               

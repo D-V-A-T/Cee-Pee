@@ -1,32 +1,33 @@
 #include<bits/stdc++.h>
-using namespace std; 
+using namespace std;
 #define fi first
 #define se second
-#define pb push_back
-#define eb emplace_back
-#define umap unordered_map
-#define prq priority_queue
-#define vect vector
-#define rs resize
+#define pii pair<int, int>
 #define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
 #define pob pop_back
+#define ef emplace_front
+#define pf push_front
 #define pof pop_front
-#define lwb lower_bound
-#define upb upper_bound
-#define pii pair<int,int>
-#define nextl cout << '\n'
-#define el '\n'
+#define el "\n"
 #define deb cout<<"\nok\n";return 
-#define ll long long
-#define int unsigned long long
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
+#define popcnt __builtin_popcountll
+#define clz __builtin_clzll
+#define ctz __builtin_ctzll
+#define ull unsigned long long
+#define ll long long 
 #define dbl long double
-#define popcnt __builtin_popcount
-#define ctz __builtin_ctz
-#define FILE "ellencute"
- 
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
- 
-void ffopen(){
+
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
     if(fopen(FILE".in", "r")){
         freopen(FILE".in", "r", stdin);
         freopen(FILE".out", "w", stdout);
@@ -34,14 +35,18 @@ void ffopen(){
     else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
 
-int pm(int a,const int b=MOD){return ((a%b)+b)%b;}
-int sq(int x){return x*x;}
+const ll N = 5e5 + 1, MOD = 1e9+7, INF = 1000000000000000069;
+
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const int b=MOD){return (a%=b) < 0 ? a + b : a;}
+ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;
     ll g = __gcd(a,b);
@@ -49,41 +54,92 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
-void sol(){
-    int n, m;
-    cin >> n >> m;
-    int a[n+1], spt[n+5][62];
-    for(int i=1;n>=i;i++){
-        cin >> a[i];
-        spt[i][0] = a[i];
+int n, m, q, d;
+
+struct Seggs{
+    int t[4 * N], sussy[4 * N];
+
+    Seggs(){
+        memset(t, 0, sizeof t);
+        memset(sussy, 0, sizeof sussy);
     }
 
+    void ligma(int l, int r, int id){
+        if(l < r) t[id] = max((r - l + 1) * (sussy[id] > 0), t[id*2] + t[id*2+1]);
+        else t[id] = (r - l + 1) * (sussy[id] > 0);
+    }
 
+    void upd(int i, int j, int x, int l=0, int r=n-1, int id=1){
+        if(l > j || r < i) return;
+        if(i <= l && r <= j){
+            sussy[id] += x;
 
-    for(int b=1;62>b;b++){
-        for(int i=1;n>=i;i++){
-            spt[i][b] = spt[spt[i][b-1]][b-1];
+            ligma(l, r, id);
+
+            return;
         }
+
+        int mid = (l + r) / 2;
+        upd(i, j, x, l, mid, id*2);
+        upd(i, j, x, mid+1, r, id*2+1);
+
+        ligma(l, r, id);
+    }
+};
+
+void sol(){
+    cin >> n >> m >> q >> d;
+
+    vect<int> a(n), zip = {0}; a[0] = 0;
+
+    for(int i=1; n>i; i++){
+        cin >> a[i];
+        zip.eb(a[i]);
+    }  
+
+    sort(bend(zip));
+    zip.rs(unique(bend(zip)) - zip.begin());
+
+    vect<int> b(m);
+
+    Seggs sgt;
+
+    auto update_range = [&](int pos, int x){
+        int left = lwb(bend(zip), pos - d) - zip.begin();
+        int right = upb(bend(zip), pos + d) - zip.begin() - 1;
+
+        if(left > right) return;
+
+        sgt.upd(left, right, x);
+    };
+
+
+    for(int i=0; m>i; i++){
+        cin >> b[i];
+        update_range(b[i], 1);
     }
 
+    cout << sgt.t[1] << el;
 
-    int ans[n+1];
-    for(int i=1;n>=i;i++){
-        int x = i;
-        for(int b=0;62>b;b++) if(m & (1ll<<b)) x = spt[x][b];
-        ans[x] = i;
+    while(q--){
+        int prev, nxt;
+        cin >> prev >> nxt;
+
+        update_range(prev, -1);
+        update_range(nxt, 1);
+
+        cout << sgt.t[1] << el;
     }
-
-    for(int i=1;n>=i;i++) cout << ans[i] << ' ';
+    
 }
 
 signed main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    ffopen();
-    int t=1;
-    //cin >> t;
-    while(t--)sol();
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);cout.tie(NULL);
+    IO();
+    int t = 1;
+    // cin >> t;
+    while(t--) sol();
 }
 /*
                                                      ...-%%%%%%%%%%%...                               

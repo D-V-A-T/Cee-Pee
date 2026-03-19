@@ -1,32 +1,33 @@
 #include<bits/stdc++.h>
-using namespace std; 
+using namespace std;
 #define fi first
 #define se second
-#define pb push_back
-#define eb emplace_back
-#define umap unordered_map
-#define prq priority_queue
-#define vect vector
-#define rs resize
+#define pii pair<int, int>
 #define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
 #define pob pop_back
+#define ef emplace_front
+#define pf push_front
 #define pof pop_front
-#define lwb lower_bound
-#define upb upper_bound
-#define pii pair<int,int>
-#define nextl cout << '\n'
-#define el '\n'
+#define el "\n"
 #define deb cout<<"\nok\n";return 
-#define ll long long
-#define int unsigned long long
-#define dbl long double
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
 #define popcnt __builtin_popcount
+#define clz __builtin_clz
 #define ctz __builtin_ctz
-#define FILE "ellencute"
- 
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
- 
-void ffopen(){
+#define ll long long 
+#define dbl long double
+#define int long long
+
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
     if(fopen(FILE".in", "r")){
         freopen(FILE".in", "r", stdin);
         freopen(FILE".out", "w", stdout);
@@ -34,14 +35,18 @@ void ffopen(){
     else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
 
-int pm(int a,const int b=MOD){return ((a%b)+b)%b;}
-int sq(int x){return x*x;}
+const ll N = 3e5 + 1, MOD = 1e9+7, INF = 1000000000000000069;
+
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;
     ll g = __gcd(a,b);
@@ -49,41 +54,93 @@ ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     return (a/g)*b;
 }
 
+int dist[2][N];
+
+void dickcha(int source, int ix, const vect<vect<pii>> &G){
+	prq<pii, vect<pii>, greater<pii>> pq;
+	
+	auto &D = dist[ix];
+	
+	pq.push({0, source});
+	memset(D, 5, sizeof D);
+	D[source] = 0;
+	
+	while(pq.size()){
+		int d, u;
+		tie(d, u) = pq.top();
+		pq.pop();
+		
+		if(d > D[u]) continue;
+		
+		for(auto [v, w] : G[u]){
+			if(d + w < D[v]){
+				D[v] = d + w;
+				pq.push({d + w, v});
+			}
+		}
+	}
+}
+
 void sol(){
-    int n, m;
-    cin >> n >> m;
-    int a[n+1], spt[n+5][62];
-    for(int i=1;n>=i;i++){
-        cin >> a[i];
-        spt[i][0] = a[i];
-    }
-
-
-
-    for(int b=1;62>b;b++){
-        for(int i=1;n>=i;i++){
-            spt[i][b] = spt[spt[i][b-1]][b-1];
-        }
-    }
-
-
-    int ans[n+1];
-    for(int i=1;n>=i;i++){
-        int x = i;
-        for(int b=0;62>b;b++) if(m & (1ll<<b)) x = spt[x][b];
-        ans[x] = i;
-    }
-
-    for(int i=1;n>=i;i++) cout << ans[i] << ' ';
+	int n, m;
+	cin >> n >> m;
+	
+	vect<vect<pii>> G(n+5), R(n+5);
+	vect<vect<int>> edges, SG(n+5);
+	
+	for(int i=0; m>i; i++){
+		int u, v, w;
+		cin >> u >> v >> w;
+		G[u].eb(v, w);
+		R[v].eb(u, w);
+		edges.pb({u, v, w});
+	}
+	
+	dickcha(1, 0, G);
+	dickcha(n, 1, R);
+	
+	vect<int> topo, in(n+5);
+	queue<int> que;
+	
+	for(auto e : edges){
+		int u = e[0], v = e[1], w = e[2];
+		
+		if(dist[0][u] + w + dist[1][v] == dist[0][n]) SG[u].eb(v), in[v]++;
+	}
+	
+	for(int i=1; n>=i; i++) if(in[i] == 0) que.push(i);
+	
+	while(que.size()){
+		int u = que.front();
+		que.pop();
+		topo.eb(u);
+		
+		for(int v : SG[u]) if(--in[v] == 0) que.push(v);
+	}
+	
+	vect<int> mn(n+5, 1e9), mx(n+5), cnt(n+5);
+	
+	mn[1] = mx[1] = cnt[1] = 1;
+	
+	
+	for(int u : topo){
+		for(int v : SG[u]){
+			mn[v] = min(mn[v], mn[u] + 1);
+			mx[v] = max(mx[v], mx[u] + 1);
+			cnt[v] = (cnt[v] + cnt[u]) % MOD;
+		}
+	}
+	
+	cout << dist[0][n] << ' ' << cnt[n] << ' ' << mn[n]-1 << ' ' << mx[n]-1 << el;
 }
 
 signed main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    ffopen();
-    int t=1;
-    //cin >> t;
-    while(t--)sol();
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);cout.tie(NULL);
+    IO();
+    int t = 1;
+    // cin >> t;
+    while(t--) sol();
 }
 /*
                                                      ...-%%%%%%%%%%%...                               

@@ -1,32 +1,32 @@
 #include<bits/stdc++.h>
-using namespace std; 
+using namespace std;
 #define fi first
 #define se second
-#define pb push_back
-#define eb emplace_back
-#define umap unordered_map
-#define prq priority_queue
-#define vect vector
-#define rs resize
+#define pii pair<int, int>
 #define bend(v) v.begin(),v.end()
+#define vect vector 
+#define prq priority_queue
+#define umap unordered_map
+#define eb emplace_back
+#define pb push_back
 #define pob pop_back
+#define ef emplace_front
+#define pf push_front
 #define pof pop_front
-#define lwb lower_bound
-#define upb upper_bound
-#define pii pair<int,int>
-#define nextl cout << '\n'
-#define el '\n'
+#define el "\n"
 #define deb cout<<"\nok\n";return 
-#define ll long long
-#define int unsigned long long
-#define dbl long double
+#define nextl cout<<"\n"
+#define lwb lower_bound 
+#define upb upper_bound
+#define rs resize
 #define popcnt __builtin_popcount
+#define clz __builtin_clz
 #define ctz __builtin_ctz
-#define FILE "ellencute"
+#define ll long long 
+#define dbl long double
  
-const ll INF=902337203695775807, N=2e5+69, MOD=1e9+7;    
- 
-void ffopen(){
+#define FILE "ijustwannabepartofyourskibidi"
+void IO(){
     if(fopen(FILE".in", "r")){
         freopen(FILE".in", "r", stdin);
         freopen(FILE".out", "w", stdout);
@@ -34,56 +34,133 @@ void ffopen(){
     else if(fopen(FILE".inp", "r")){
         freopen(FILE".inp", "r", stdin);
         freopen(FILE".out", "w", stdout);
-    }else if(fopen("ellencute.inp", "r")){
-        freopen("ellencute.inp", "r", stdin);
-        freopen("ellencute.out", "w", stdout);
     }
 }
-
-int pm(int a,const int b=MOD){return ((a%b)+b)%b;}
-int sq(int x){return x*x;}
+ 
+const ll N = 3e5 + 1, MOD = 1e9+7, INF = 1000000000000000069;
+ 
+mt19937_64 rng(chrono::high_resolution_clock::now().time_since_epoch().count());
+ 
+ll rand(ll l, ll r){
+    return uniform_int_distribution<ll>(l, r)(rng);
+}
+ll pm(ll a,const ll b=MOD){return ((a%b)+b)%b;}
+ll sq(ll x){return x*x;}
 ll __lcm(ll a, ll b, const ll lim=LLONG_MAX){
     if(a == -1 || b == -1)return -1;
     ll g = __gcd(a,b);
     if(b/g > lim/a)return -1;
     return (a/g)*b;
 }
-
+ 
+ 
+const int mod1 = 1e9 + 9, base = 269;
+struct Hashing{
+	vect<ll> H, HO, P, PO;
+	
+	void init(const string &s){
+		int n = s.size();
+		H.assign(n, 0);
+		HO.assign(n, 0);
+		P.assign(n, 0);
+		PO.assign(n, 0);
+		
+		P[0] = PO[0] = 1;
+		H[0] = HO[0] = s[0];
+		for(int i=1; n>i; i++){
+			H[i] = (H[i-1] * base + s[i]) % mod1;
+			HO[i] = (HO[i-1] * base + s[i]);
+			P[i] = P[i-1] * base % mod1;
+			PO[i] = PO[i-1] * base;
+		}
+	}
+	
+	ll gh(int i, int j){
+		return pm(H[j] - (i ? H[i-1] * P[j-i+1] : 0), mod1);
+	}
+	
+	ll gho(int i, int j){
+		return HO[j] - (i ? HO[i-1] * PO[j-i+1] : 0);
+	}
+	
+	pair<ll, ll> get_hash(int i, int j){
+		return {gho(i, j), gh(i, j)};
+	}
+} hs;
+ 
 void sol(){
-    int n, m;
-    cin >> n >> m;
-    int a[n+1], spt[n+5][62];
-    for(int i=1;n>=i;i++){
-        cin >> a[i];
-        spt[i][0] = a[i];
-    }
-
-
-
-    for(int b=1;62>b;b++){
-        for(int i=1;n>=i;i++){
-            spt[i][b] = spt[spt[i][b-1]][b-1];
-        }
-    }
-
-
-    int ans[n+1];
-    for(int i=1;n>=i;i++){
-        int x = i;
-        for(int b=0;62>b;b++) if(m & (1ll<<b)) x = spt[x][b];
-        ans[x] = i;
-    }
-
-    for(int i=1;n>=i;i++) cout << ans[i] << ' ';
+	int n, l, r;
+	cin >> n >> l >> r;
+	string s;
+	cin >> s;
+	s = " " + s;
+	
+	hs.init(s);
+	
+	vect<int> sus[n+5], mx_str(n+5);
+	// mx_str[i] : maximum string if their lcp is i
+	
+	for(int i=1; n>=i; i++){
+		// i + hi -1 <= n  <-> hi <= n - i + 1
+		int lo = 1, hi = n - i + 1, res = 0;
+		while(lo <= hi){
+			int mid = (lo + hi) / 2;
+			
+			if(hs.get_hash(1, mid) == hs.get_hash(i, i+mid-1)) {
+				res = mid;
+				lo = mid + 1;
+			}else hi = mid - 1;
+		}
+		
+		sus[res].eb(i);
+	}
+	
+	set<int> curr;
+	
+	for(int lcp=n; lcp>=1; lcp--){
+		for(int i : sus[lcp]) curr.insert(i);
+		
+		assert(curr.size());
+		
+		int ptr = *curr.begin(), cnt = 1;
+		
+		while("sussy"){
+			
+			int nxt = ptr + lcp;			
+			auto it = curr.lwb(nxt);			
+			if(it == curr.end()) break;
+			
+			cnt++;
+			ptr = *it;
+		}
+		
+		mx_str[lcp] = cnt;
+		
+	}
+	
+	for(int i=l; r>=i; i++){
+		int lo = 1, hi = n-i+1, ans = 0;
+		
+		while(lo <= hi){
+			int mid = (lo + hi) / 2;
+			if(mx_str[mid] >= i){
+				ans = mid;
+				lo = mid + 1;
+			}else hi = mid - 1;
+		}
+		
+		cout << ans << ' ';
+	}
+	nextl;
 }
-
+ 
 signed main(){
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-    ffopen();
-    int t=1;
-    //cin >> t;
-    while(t--)sol();
+    ios_base::sync_with_stdio(0);
+    cin.tie(NULL);cout.tie(NULL);
+    IO();
+    int t = 1;
+    cin >> t;
+    while(t--) sol();
 }
 /*
                                                      ...-%%%%%%%%%%%...                               
