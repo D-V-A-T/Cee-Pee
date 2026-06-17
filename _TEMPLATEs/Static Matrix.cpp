@@ -3,7 +3,8 @@
 #define vect vector 
 using namespace std;
 
-const int MOD = 1e9+7, max_mat_sz = 4;
+const int MOD = 1e9+7;
+const int max_mat_sz = 4;
 int mat_sz = 2;
 
 struct StaticMatrix{
